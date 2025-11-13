@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ваш профиль</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #1a1d20;
+            --card-color: #262a2e;
+            --text-color: #e0e0e0;
+            --secondary-text-color: #9a9a9a;
+            --code-bg: #33373b;
+            --green-color: #50fa7b;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overscroll-behavior: none;
+        }
+        .profile-card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            font-size: 1em;
+            border-bottom: 1px solid #3a3f44;
+        }
+        .stat-item:last-child { border-bottom: none; }
+        .stat-label { color: var(--secondary-text-color); }
+        .stat-value { font-weight: 500; }
+        .stat-value code {
+            background-color: var(--code-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .luck-effect {
+            background-color: rgba(80, 250, 123, 0.08);
+            color: var(--green-color);
+            border-left: 3px solid var(--green-color);
+            margin: 10px -20px 0 -20px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="profile-card" id="profile">
+    <div class="profile-header" id="user-name">Загрузка...</div>
+    <div class="stat-item">
+        <span class="stat-label">💰 Баланс</span>
+        <span class="stat-value"><code id="balance">0 $</code></span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">💸 Доход</span>
+        <span class="stat-value"><code id="income">0 $/мин</code></span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">🌟 Уровень</span>
+        <span class="stat-value" id="level">0</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">⚙️ Прокачка</span>
+        <span class="stat-value"><code id="upgrade-cost">0 $</code></span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">❔ Статус</span>
+        <span class="stat-value" id="status">...</span>
+    </div>
+    <div class="stat-item luck-effect" id="luck-section" style="display: none;">
+        <span class="stat-label">🍀 Эффект удачи</span>
+        <span class="stat-value"><code id="luck-left">0 сек</code></span>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        function formatNumber(num) {
+            if (typeof num !== 'number') return num;
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const userData = JSON.parse(decodeURIComponent(params.get('user_data')));
+
+            document.getElementById('user-name').innerText = userData.name || 'Ваш профиль';
+            document.getElementById('balance').innerText = formatNumber(userData.balance) + ' $';
+            document.getElementById('income').innerText = formatNumber(userData.income) + ' $/мин';
+            document.getElementById('level').innerText = userData.level;
+            document.getElementById('upgrade-cost').innerText = formatNumber(userData.upgrade_cost) + ' $';
+            document.getElementById('status').innerHTML = `<i>${userData.status}</i>`;
+
+            if (userData.luck_left) {
+                document.getElementById('luck-left').innerText = `осталось ${userData.luck_left} сек`;
+                document.getElementById('luck-section').style.display = 'flex';
+            }
+            
+            const profileCard = document.getElementById('profile');
+            profileCard.style.opacity = 1;
+            profileCard.style.transform = 'translateY(0)';
+
+        } catch (e) {
+            console.error("Ошибка при получении данных:", e);
+            document.getElementById('user-name').innerText = "Ошибка загрузки";
+            const profileCard = document.getElementById('profile');
+            profileCard.style.opacity = 1;
+            profileCard.style.transform = 'translateY(0)';
+        }
+    });
+</script>
+
+</body>
+</html>
