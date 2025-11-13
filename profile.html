@@ -1,75 +1,190 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Ваш профиль</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Цветовая палитра и основные переменные */
         :root {
-            --bg-color: #1a1d20;
-            --card-color: #262a2e;
-            --text-color: #e0e0e0;
-            --secondary-text-color: #9a9a9a;
-            --code-bg: #33373b;
-            --green-color: #50fa7b;
+            --bg-color: #121417; /* Чуть темнее для большего контраста */
+            --card-color: #1e2125; /* Темнее, но светлее фона, для глубины */
+            --text-color: #f0f0f0; /* Светлее основной текст */
+            --secondary-text-color: #8c929a; /* Более выраженный серый */
+            --code-bg: #2b2e32; /* Фон для кода */
+            --green-color: #69F0AE; /* Более яркий и приятный зеленый */
+            --border-color: #2c3034; /* Цвет разделителей */
         }
+
+        /* Общие стили для тела страницы */
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 20px; /* Немного больше отступов от краев */
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center; /* Центрирование карточки по вертикали */
             min-height: 100vh;
-            overscroll-behavior: none;
+            overscroll-behavior: none; /* Предотвращает "отскок" на iOS */
+            box-sizing: border-box; /* Для правильного учета padding */
         }
+
+        /* Карточка профиля */
         .profile-card {
             background-color: var(--card-color);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px; /* Чуть более скругленные углы */
+            padding: 25px; /* Больше внутреннего отступа */
             width: 100%;
-            max-width: 400px;
+            max-width: 420px; /* Чуть шире для лучшего вида на больших экранах */
             box-sizing: border-box;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            /* Более мягкая и глубокая тень, с легкой внутренней обводкой для контраста */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Чуть более плавный переход */
         }
+
+        /* Состояние после загрузки для анимации */
+        .profile-card.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Заголовок профиля */
         .profile-header {
             text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.4em;
-            font-weight: 600;
+            margin-bottom: 30px; /* Увеличенный отступ от следующего элемента */
+            font-size: 1.8em; /* Крупнее заголовок */
+            font-weight: 700; /* Более жирный */
+            letter-spacing: -0.02em; /* Небольшой отрицательный кернинг для плотности */
+            color: var(--text-color); /* Убедиться, что цвет правильный */
+            line-height: 1.2;
         }
+
+        /* Элемент статистики */
         .stat-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            font-size: 1em;
-            border-bottom: 1px solid #3a3f44;
+            padding: 15px 0; /* Больше вертикального отступа */
+            font-size: 1.05em; /* Чуть крупнее текст */
+            border-bottom: 1px solid var(--border-color); /* Используем переменную для разделителя */
         }
-        .stat-item:last-child { border-bottom: none; }
-        .stat-label { color: var(--secondary-text-color); }
-        .stat-value { font-weight: 500; }
+
+        /* Последний элемент статистики без нижней границы */
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Метка статистики */
+        .stat-label {
+            color: var(--secondary-text-color);
+            font-weight: 400; /* Стандартный вес */
+        }
+
+        /* Значение статистики */
+        .stat-value {
+            font-weight: 600; /* Жирнее значения для акцента */
+            color: var(--text-color); /* Значения основного цвета */
+        }
+
+        /* Элемент <CODE> внутри значения */
         .stat-value code {
             background-color: var(--code-bg);
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 5px 9px; /* Увеличенный padding для читаемости */
+            border-radius: 8px; /* Чуть более скругленные углы */
+            font-family: 'SF Mono', 'Roboto Mono', monospace; /* Моноширинный шрифт для кода */
+            font-size: 0.9em; /* Чуть меньше размер для кода */
+            color: var(--green-color); /* Зеленый цвет для кодовых значений */
+            white-space: nowrap; /* Предотвращает перенос длинных значений */
         }
+
+        /* Секция эффекта удачи */
         .luck-effect {
-            background-color: rgba(80, 250, 123, 0.08);
+            background-color: rgba(105, 240, 174, 0.08); /* Используем новую зелень с прозрачностью */
             color: var(--green-color);
-            border-left: 3px solid var(--green-color);
-            margin: 10px -20px 0 -20px;
-            padding: 10px 20px;
+            border-left: 4px solid var(--green-color); /* Чуть толще граница */
+            /* Расширяем секцию, чтобы она заходила на padding карточки и выглядела как отдельный блок */
+            margin: 20px -25px -25px -25px;
+            padding: 15px 25px; /* Отступы внутри секции */
+            border-bottom-left-radius: 16px; /* Скругление по нижней границе карточки */
+            border-bottom-right-radius: 16px;
+            font-weight: 500;
+            text-align: center; /* Центрирование текста внутри секции */
+            /* Чтобы label и value были друг под другом */
+            display: block;
+            line-height: 1.4;
         }
+        .luck-effect .stat-label { /* Убираем вторичный цвет для текста удачи, используем основной зеленый */
+            color: inherit;
+            display: block; /* Позиционируем метку над значением */
+            margin-bottom: 5px; /* Отступ между меткой и значением */
+            font-size: 0.9em;
+            opacity: 0.8; /* Чуть менее заметно */
+        }
+        .luck-effect .stat-value {
+            display: block; /* Позиционируем значение под меткой */
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .luck-effect .stat-value code {
+            background-color: rgba(105, 240, 174, 0.15); /* Темнее фон для кода в секции удачи */
+            color: var(--green-color);
+        }
+        /* Убираем нижнюю границу, если luck-effect является .stat-item */
+        .luck-effect.stat-item {
+            border-bottom: none;
+            padding: 0; /* Убираем внутренний padding, так как его задаёт сам .luck-effect */
+        }
+
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const profileCard = document.getElementById('profile');
+            // Добавляем класс 'loaded' для активации CSS-перехода после загрузки DOM
+            profileCard.classList.add('loaded');
+
+            // Инициализация Telegram Web App
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand(); // Расширяем окно на всю доступную высоту
+                Telegram.WebApp.setHeaderColor('bg_color'); // Устанавливаем цвет заголовка ТГ приложения
+                Telegram.WebApp.setBackgroundColor('bg_color'); // Устанавливаем цвет фона ТГ приложения
+            }
+        });
+    </script>
 </head>
 <body>
+    <div class="profile-card" id="profile">
+        <div class="profile-header" id="user-name">Ваш Профиль</div> <!-- Изменено для начального вида -->
+        <div class="stat-item">
+            <span class="stat-label">💰 Баланс</span>
+            <span class="stat-value"><code id="balance">123 456 789 $</code></span> <!-- Пример данных -->
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">💸 Доход</span>
+            <span class="stat-value"><code id="income">12 345 $/мин</code></span> <!-- Пример данных -->
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">🌟 Уровень</span>
+            <span class="stat-value" id="level">73</span> <!-- Пример данных -->
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">⚙️ Прокачка</span>
+            <span class="stat-value"><code id="upgrade-cost">99 999 $</code></span> <!-- Пример данных -->
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">❔ Статус</span>
+            <span class="stat-value" id="status">Активен</span> <!-- Пример данных -->
+        </div>
+        <!-- Секция удачи теперь внутри .stat-item, но с переопределенными стилями -->
+        <div class="stat-item luck-effect" id="luck-section" style="display: block;"> <!-- display: block для примера -->
+            <span class="stat-label">🍀 Эффект удачи</span>
+            <span class="stat-value"><code id="luck-left">01:23 сек</code></span> <!-- Пример данных -->
+        </div>
+    </div>
+</body>
 
 <div class="profile-card" id="profile">
     <div class="profile-header" id="user-name">Загрузка...</div>
